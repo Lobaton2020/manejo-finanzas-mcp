@@ -18,7 +18,7 @@ use Tools\EgressMoney\GetCategoriesTool;
 use Tools\EgressMoney\GetAvailableByDepositsTool;
 use Tools\EgressMoney\OutflowMoneyTool;
 
-$sessionDir = __DIR__ . '/../../sessions';
+$sessionDir = '/tmp/finanzas-mcp-sessions';
 if (!is_dir($sessionDir)) {
     mkdir($sessionDir, 0755, true);
 }
