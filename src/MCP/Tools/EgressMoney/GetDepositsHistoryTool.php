@@ -9,7 +9,7 @@ use Tools\BaseTool;
 
 class GetDepositsHistoryTool extends BaseTool
 {
-    #[McpTool(name: 'get_deposits_history')]
+    #[McpTool(name: 'get_deposits_history', description: 'Obtiene el historial de depósitos por mes en series de tiempo. Para cada depósito, agrupa los ingresos y egresos por mes (formato YYYY-MM), calcula el total de ingresos, el total de egresos, y el saldo (ingreso - egreso) acumulado mes a mes. Útil para análisis financiero y seguimiento de cashflow por período.')]
     public function getDepositsHistory(int $idUser = 1): array
     {
         return $this->executeWithLogging(function () use ($idUser) {
@@ -35,7 +35,7 @@ class GetDepositsHistoryTool extends BaseTool
             $formatted = $deposits->map(function ($deposit) use ($idUser) {
                 $monthlyIncome = $this->table('inflow_porcent')
                     ->join('inflows', 'inflow_porcent.id_inflow', '=', 'inflows.id_inflow')
-                    ->where('inflow_porcent.id_porcent', 'porcents.id_porcent')
+                    ->where('inflow_porcent.id_porcent', '=', 'inflow_porcent.id_porcent')
                     ->where('inflows.id_user', $idUser)
                     ->where('inflows.status', 1)
                     ->selectRaw('DATE_FORMAT(inflows.set_date, "%Y-%m") as month')
@@ -46,7 +46,7 @@ class GetDepositsHistoryTool extends BaseTool
                     ->keyBy('month');
 
                 $monthlyOutflow = $this->table('outflows')
-                    ->where('outflows.id_porcent', 'porcents.id_porcent')
+                    ->where('outflows.id_porcent', '=', 'outflows.id_porcent')
                     ->where('outflows.id_user', $idUser)
                     ->where('outflows.status', 1)
                     ->selectRaw('DATE_FORMAT(outflows.set_date, "%Y-%m") as month')
