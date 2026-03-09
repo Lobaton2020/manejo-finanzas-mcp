@@ -22,13 +22,11 @@ use Tools\EgressMoney\GetOutflowTypesTool;
 use Tools\EgressMoney\GetCategoriesTool;
 use Tools\EgressMoney\GetAvailableByDepositsTool;
 use Tools\EgressMoney\OutflowMoneyTool;
-use Tools\EgressMoney\GetDepositsHistoryTool;
 
 require_once __DIR__ . '/Tools/EgressMoney/GetOutflowTypesTool.php';
 require_once __DIR__ . '/Tools/EgressMoney/GetCategoriesTool.php';
 require_once __DIR__ . '/Tools/EgressMoney/GetAvailableByDepositsTool.php';
 require_once __DIR__ . '/Tools/EgressMoney/OutflowMoneyTool.php';
-require_once __DIR__ . '/Tools/EgressMoney/GetDepositsHistoryTool.php';
 
 $server = Server::builder()
     ->setServerInfo('Finanzas MCP Server', '1.0.0')
@@ -36,7 +34,6 @@ $server = Server::builder()
     ->addTool([GetCategoriesTool::class, 'getCategories'], 'get_categories')
     ->addTool([GetAvailableByDepositsTool::class, 'getAvailableByDeposits'], 'get_available_by_deposits')
     ->addTool([OutflowMoneyTool::class, 'outflowMoney'], 'outflow_money')
-    ->addTool([GetDepositsHistoryTool::class, 'getDepositsHistory'], 'get_deposits_history')
     ->setSession(new FileSessionStore($sessionDir))
     ->build();
 

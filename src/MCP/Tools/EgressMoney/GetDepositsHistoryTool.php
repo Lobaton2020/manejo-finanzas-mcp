@@ -35,10 +35,10 @@ class GetDepositsHistoryTool extends BaseTool
             $formatted = $deposits->map(function ($deposit) use ($idUser) {
                 $monthlyIncome = $this->table('inflow_porcent')
                     ->join('inflows', 'inflow_porcent.id_inflow', '=', 'inflows.id_inflow')
-                    ->whereColumn('inflow_porcent.id_porcent', 'porcents.id_porcent')
+                    ->where('inflow_porcent.id_porcent', 'porcents.id_porcent')
                     ->where('inflows.id_user', $idUser)
                     ->where('inflows.status', 1)
-                    ->selectRaw('DATE_FORMAT(inflows.date, "%Y-%m") as month')
+                    ->selectRaw('DATE_FORMAT(inflows.set_date, "%Y-%m") as month')
                     ->selectRaw('COALESCE(SUM(inflows.total * (inflow_porcent.porcent / 100)), 0) as income')
                     ->groupBy('month')
                     ->orderBy('month')
@@ -46,10 +46,10 @@ class GetDepositsHistoryTool extends BaseTool
                     ->keyBy('month');
 
                 $monthlyOutflow = $this->table('outflows')
-                    ->whereColumn('outflows.id_porcent', 'porcents.id_porcent')
+                    ->where('outflows.id_porcent', 'porcents.id_porcent')
                     ->where('outflows.id_user', $idUser)
                     ->where('outflows.status', 1)
-                    ->selectRaw('DATE_FORMAT(outflows.date, "%Y-%m") as month')
+                    ->selectRaw('DATE_FORMAT(outflows.set_date, "%Y-%m") as month')
                     ->selectRaw('COALESCE(SUM(outflows.amount), 0) as expense')
                     ->groupBy('month')
                     ->orderBy('month')
