@@ -1,0 +1,60 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# PHP
+/vendor/
+/composer.phar
+composer.lock
+*.phpunit.cache
+
+# Node
+/node_modules/
+/npm-debug.log
+/package-lock.json
+/yarn.lock
+
+# IDE
+/.idea/
+/.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+/logs/
+*.log
+
+# Cache
+/cache/
+/tmp/
+/temp/
+
+# Uploads
+/uploads/
+/media/
+
+# Sessions
+/sessions/
+
+composer
+composer-setup*
+finanzas.db
+php.ini
+replicate_db.*
+
+logs
+
+check_tables.php
+_finanzas.db
+db_structure.php
+nul
+
+db_structure.txt
+
+sessions

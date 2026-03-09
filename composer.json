@@ -1,0 +1,33 @@
+{
+    "config": {
+        "disable-tls": true,
+        "secure-http": false,
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://repo.packagist.org",
+            "options": {
+                "ssl": {
+                    "verify_peer": false,
+                    "verify_peer_name": false
+                }
+            }
+        }
+    ],
+    "require": {
+        "illuminate/database": "^11.0",
+        "mcp/sdk": "^0.4.0",
+        "nyholm/psr7": "^1.8",
+        "nyholm/psr7-server": "^1.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Tools\\": "src/MCP/Tools/",
+            "Database\\": "src/Database/"
+        }
+    }
+}
