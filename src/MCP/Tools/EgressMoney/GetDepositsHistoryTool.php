@@ -9,88 +9,64 @@ use Tools\BaseTool;
 
 class GetDepositsHistoryTool extends BaseTool
 {
-    #[McpTool(name: 'get_deposits_history', description: 'Obtiene el historial de depósitos por mes en series de tiempo. Para cada depósito, agrupa los ingresos y egresos por mes (formato YYYY-MM), calcula el total de ingresos, el total de egresos, y el saldo (ingreso - egreso) acumulado mes a mes. Útil para análisis financiero y seguimiento de cashflow por período.')]
+    #[McpTool(name: 'get_deposits_history', description: 'Obtiene el historial global de ingresos y egresos por mes. Devuelve totales mensuales de ingresos (excluyendo retornos de inversión) y egresos (solo los en presupuesto).')]
     public function getDepositsHistory(int $idUser = 1): array
     {
         return $this->executeWithLogging(function () use ($idUser) {
-            $deposits = $this->table('porcents')
-                ->select([
-                    'porcents.id_porcent',
-                    'porcents.name',
-                ])
-                ->where('porcents.status', 1)
-                ->where('porcents.id_user', $idUser)
-                ->orderBy('porcents.name')
-                ->get();
+            // Get monthly inflows (excluding type 8 - Retorno inversión)
+            $inflows = $this->table('inflows')
+                ->where('inflows.id_user', $idUser)
+                ->where('inflows.status', 1)
+                ->where('inflows.id_inflow_type', '!=', 8)
+                ->selectRaw('DATE_FORMAT(inflows.set_date, "%Y-%m") as month')
+                ->selectRaw('COALESCE(SUM(inflows.total), 0) as total_income')
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get()
+                ->keyBy('month')
+                ->toArray();
 
-            if ($deposits->isEmpty()) {
-                return [
-                    'content' => [
-                        'type' => 'text',
-                        'text' => 'No hay depósitos activos disponibles.'
-                    ]
+            // Get monthly outflows (only is_in_budget = 1)
+            $outflows = $this->table('outflows')
+                ->where('outflows.id_user', $idUser)
+                ->where('outflows.status', 1)
+                ->where('outflows.is_in_budget', 1)
+                ->selectRaw('DATE_FORMAT(outflows.set_date, "%Y-%m") as month')
+                ->selectRaw('COALESCE(SUM(outflows.amount), 0) as total_expense')
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get()
+                ->keyBy('month')
+                ->toArray();
+
+            // Get all unique months
+            $allMonths = array_unique(array_merge(
+                array_keys($inflows),
+                array_keys($outflows)
+            ));
+            sort($allMonths);
+
+            // Build result
+            $history = [];
+            $balance = 0;
+
+            foreach ($allMonths as $month) {
+                $income = isset($inflows[$month]) ? round((float) $inflows[$month]->total_income, 2) : 0;
+                $expense = isset($outflows[$month]) ? round((float) $outflows[$month]->total_expense, 2) : 0;
+                $balance = round($balance + $income - $expense, 2);
+
+                $history[] = [
+                    'date' => $month,
+                    'income' => $income,
+                    'expense' => $expense,
+                    'balance' => $balance,
                 ];
             }
-
-            $formatted = $deposits->map(function ($deposit) use ($idUser) {
-                $monthlyIncome = $this->table('inflow_porcent')
-                    ->join('inflows', 'inflow_porcent.id_inflow', '=', 'inflows.id_inflow')
-                    ->where('inflow_porcent.id_porcent', '=', 'inflow_porcent.id_porcent')
-                    ->where('inflows.id_user', $idUser)
-                    ->where('inflows.status', 1)
-                    ->selectRaw('DATE_FORMAT(inflows.set_date, "%Y-%m") as month')
-                    ->selectRaw('COALESCE(SUM(inflows.total * (inflow_porcent.porcent / 100)), 0) as income')
-                    ->groupBy('month')
-                    ->orderBy('month')
-                    ->get()
-                    ->keyBy('month');
-
-                $monthlyOutflow = $this->table('outflows')
-                    ->where('outflows.id_porcent', '=', 'outflows.id_porcent')
-                    ->where('outflows.id_user', $idUser)
-                    ->where('outflows.status', 1)
-                    ->selectRaw('DATE_FORMAT(outflows.set_date, "%Y-%m") as month')
-                    ->selectRaw('COALESCE(SUM(outflows.amount), 0) as expense')
-                    ->groupBy('month')
-                    ->orderBy('month')
-                    ->get()
-                    ->keyBy('month');
-
-                $allMonths = array_unique(
-                    array_merge(
-                        $monthlyIncome->pluck('month')->toArray(),
-                        $monthlyOutflow->pluck('month')->toArray()
-                    )
-                );
-                sort($allMonths);
-
-                $history = [];
-                $balance = 0;
-
-                foreach ($allMonths as $month) {
-                    $income = round((float) ($monthlyIncome->get($month)?->income ?? 0), 2);
-                    $expense = round((float) ($monthlyOutflow->get($month)?->expense ?? 0), 2);
-                    $balance = round($balance + $income - $expense, 2);
-
-                    $history[] = [
-                        'date' => $month,
-                        'income' => $income,
-                        'expense' => $expense,
-                        'balance' => $balance,
-                    ];
-                }
-
-                return [
-                    'id' => $deposit->id_porcent,
-                    'name' => $deposit->name,
-                    'history' => $history,
-                ];
-            })->toArray();
 
             return [
                 'content' => [
                     'type' => 'text',
-                    'text' => json_encode($formatted, JSON_PRETTY_PRINT)
+                    'text' => json_encode($history, JSON_PRETTY_PRINT)
                 ]
             ];
         }, 'get_deposits_history', ['idUser' => $idUser]);
