@@ -34,7 +34,8 @@ class Connection
                 'foreign_key_constraints' => true,
             ]);
         } else {
-            $dotenv = parse_ini_file(__DIR__ . '/../../.env');
+            $envPath = __DIR__ . '/../../.env';
+            $dotenv = file_exists($envPath) ? parse_ini_file($envPath) : false;
 
             $capsule->addConnection([
                 'driver' => 'mysql',
