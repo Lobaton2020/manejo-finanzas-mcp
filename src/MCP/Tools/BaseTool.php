@@ -20,7 +20,7 @@ class BaseTool
 
     protected function log(string $level, string $message, array $context = []): void
     {
-        $logDir = __DIR__ . '/../../logs';
+        $logDir = '/tmp/finanzas-mcp-logs';
         if (!is_dir($logDir)) {
             mkdir($logDir, 0755, true);
         }

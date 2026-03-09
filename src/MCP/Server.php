@@ -10,18 +10,12 @@ require_once __DIR__ . '/Tools/BaseTool.php';
 use Mcp\Server;
 use Mcp\Server\Transport\StdioTransport;
 use Mcp\Server\Transport\StreamableHttpTransport;
-use Mcp\Server\Session\FileSessionStore;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use Tools\EgressMoney\GetOutflowTypesTool;
 use Tools\EgressMoney\GetCategoriesTool;
 use Tools\EgressMoney\GetAvailableByDepositsTool;
 use Tools\EgressMoney\OutflowMoneyTool;
-
-$sessionDir = '/tmp/finanzas-mcp-sessions';
-if (!is_dir($sessionDir)) {
-    mkdir($sessionDir, 0755, true);
-}
 
 require_once __DIR__ . '/Tools/EgressMoney/GetOutflowTypesTool.php';
 require_once __DIR__ . '/Tools/EgressMoney/GetCategoriesTool.php';
@@ -34,7 +28,6 @@ $server = Server::builder()
     ->addTool([GetCategoriesTool::class, 'getCategories'], 'get_categories')
     ->addTool([GetAvailableByDepositsTool::class, 'getAvailableByDeposits'], 'get_available_by_deposits')
     ->addTool([OutflowMoneyTool::class, 'outflowMoney'], 'outflow_money')
-    ->setSession(new FileSessionStore($sessionDir))
     ->build();
 
 $isHttp = isset($_SERVER['REQUEST_METHOD']);
