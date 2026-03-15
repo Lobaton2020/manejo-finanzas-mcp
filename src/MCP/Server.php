@@ -24,10 +24,12 @@ use Tools\EgressMoney\GetCategoriesTool;
 use Tools\EgressMoney\GetAvailableByDepositsTool;
 use Tools\EgressMoney\OutflowMoneyTool;
 use Tools\EgressMoney\GetDepositsHistoryTool;
+use Tools\EgressMoney\GetOutflowsByMonthTool;
 use Tools\InflowMoney\InflowMoneyTool;
 
 require_once __DIR__ . '/Tools/EgressMoney/OutflowMoneyTool.php';
 require_once __DIR__ . '/Tools/EgressMoney/GetDepositsHistoryTool.php';
+require_once __DIR__ . '/Tools/EgressMoney/GetOutflowsByMonthTool.php';
 require_once __DIR__ . '/Tools/EgressMoney/GetCategoriesTool.php';
 require_once __DIR__ . '/Tools/EgressMoney/GetAvailableByDepositsTool.php';
 require_once __DIR__ . '/Tools/InflowMoney/GetInflowTypesTool.php';
@@ -41,6 +43,7 @@ $server = Server::builder()
     ->addTool([GetAvailableByDepositsTool::class, 'getAvailableByDeposits'], 'get_available_by_deposits')
     ->addTool([OutflowMoneyTool::class, 'outflowMoney'], 'outflow_money')
     ->addTool([GetDepositsHistoryTool::class, 'getDepositsHistory'], 'get_deposits_history')
+    ->addTool([GetOutflowsByMonthTool::class, 'getOutflowsByMonth'], 'get_outflows_by_month')
     ->addTool([InflowMoneyTool::class, 'inflowMoney'], 'inflow_money')
     ->setSession(new FileSessionStore($sessionDir))
     ->build();
