@@ -28,6 +28,8 @@ use Tools\InflowMoney\InflowMoneyTool;
 
 require_once __DIR__ . '/Tools/EgressMoney/OutflowMoneyTool.php';
 require_once __DIR__ . '/Tools/EgressMoney/GetDepositsHistoryTool.php';
+require_once __DIR__ . '/Tools/EgressMoney/GetCategoriesTool.php';
+require_once __DIR__ . '/Tools/EgressMoney/GetAvailableByDepositsTool.php';
 require_once __DIR__ . '/Tools/InflowMoney/GetInflowTypesTool.php';
 require_once __DIR__ . '/Tools/InflowMoney/InflowMoneyTool.php';
 
