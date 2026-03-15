@@ -33,6 +33,7 @@ class InflowMoneyTool extends BaseTool
         int $idUser = 1,
         bool $dryRun = false
     ): array {
+        date_default_timezone_set('America/Bogota');
         return $this->executeWithLogging(function () use ($idInflowType, $total, $porcents, $setDate, $description, $idUser, $dryRun) {
             $setDate = $setDate ?? date('Y-m-d');
 
