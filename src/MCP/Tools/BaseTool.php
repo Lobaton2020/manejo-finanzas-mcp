@@ -18,6 +18,12 @@ class BaseTool
         return \Connection::table($table);
     }
 
+    protected function transaction(callable $callback)
+    {
+        $capsule = $this->getConnection();
+        return $capsule->connection()->transaction($callback);
+    }
+
     protected function log(string $level, string $message, array $context = []): void
     {
         $logDir = '/tmp/finanzas-mcp-logs';

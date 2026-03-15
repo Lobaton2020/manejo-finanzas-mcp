@@ -19,24 +19,27 @@ if (!is_dir($sessionDir)) {
 }
 use Nyholm\Psr7Server\ServerRequestCreator;
 use Tools\EgressMoney\GetOutflowTypesTool;
+use Tools\InflowMoney\GetInflowTypesTool;
 use Tools\EgressMoney\GetCategoriesTool;
 use Tools\EgressMoney\GetAvailableByDepositsTool;
 use Tools\EgressMoney\OutflowMoneyTool;
 use Tools\EgressMoney\GetDepositsHistoryTool;
+use Tools\InflowMoney\InflowMoneyTool;
 
-require_once __DIR__ . '/Tools/EgressMoney/GetOutflowTypesTool.php';
-require_once __DIR__ . '/Tools/EgressMoney/GetCategoriesTool.php';
-require_once __DIR__ . '/Tools/EgressMoney/GetAvailableByDepositsTool.php';
 require_once __DIR__ . '/Tools/EgressMoney/OutflowMoneyTool.php';
 require_once __DIR__ . '/Tools/EgressMoney/GetDepositsHistoryTool.php';
+require_once __DIR__ . '/Tools/InflowMoney/GetInflowTypesTool.php';
+require_once __DIR__ . '/Tools/InflowMoney/InflowMoneyTool.php';
 
 $server = Server::builder()
     ->setServerInfo('Finanzas MCP Server', '1.0.0')
     ->addTool([GetOutflowTypesTool::class, 'getOutflowTypes'], 'get_outflow_types')
+    ->addTool([GetInflowTypesTool::class, 'getInflowTypes'], 'get_inflow_types')
     ->addTool([GetCategoriesTool::class, 'getCategories'], 'get_categories')
     ->addTool([GetAvailableByDepositsTool::class, 'getAvailableByDeposits'], 'get_available_by_deposits')
     ->addTool([OutflowMoneyTool::class, 'outflowMoney'], 'outflow_money')
     ->addTool([GetDepositsHistoryTool::class, 'getDepositsHistory'], 'get_deposits_history')
+    ->addTool([InflowMoneyTool::class, 'inflowMoney'], 'inflow_money')
     ->setSession(new FileSessionStore($sessionDir))
     ->build();
 
