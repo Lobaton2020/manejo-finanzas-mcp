@@ -40,6 +40,7 @@ class OutflowMoneyTool extends BaseTool
         bool $dryRun = false
     ): array {
         return $this->executeWithLogging(function () use ($idOutflowType, $idCategory, $idPorcent, $amount, $setDate, $isInBudget, $description, $idUser, $dryRun) {
+            date_default_timezone_set('America/Bogota');
             $setDate = $setDate ?? date('Y-m-d');
 
             $user = $this->table('users')
