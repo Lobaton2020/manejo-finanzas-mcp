@@ -4,21 +4,11 @@ declare(strict_types=1);
 
 date_default_timezone_set('America/Bogota');
 
-require_once __DIR__ . '/../../vendor/autoload.php';
-
-require_once __DIR__ . '/../../src/Database/Connection.php';
-require_once __DIR__ . '/Tools/BaseTool.php';
-
 use Mcp\Server;
 use Mcp\Server\Transport\StdioTransport;
 use Mcp\Server\Transport\StreamableHttpTransport;
 use Mcp\Server\Session\FileSessionStore;
 use Nyholm\Psr7\Factory\Psr17Factory;
-
-$sessionDir = '/tmp/finanzas-mcp-sessions';
-if (!is_dir($sessionDir)) {
-    mkdir($sessionDir, 0755, true);
-}
 use Nyholm\Psr7Server\ServerRequestCreator;
 use Tools\EgressMoney\GetOutflowTypesTool;
 use Tools\InflowMoney\GetInflowTypesTool;
@@ -30,72 +20,89 @@ use Tools\EgressMoney\GetOutflowsByMonthTool;
 use Tools\InflowMoney\InflowMoneyTool;
 use Tools\SharedFund\SharedFundTool;
 
-require_once __DIR__ . '/Tools/EgressMoney/OutflowMoneyTool.php';
-require_once __DIR__ . '/Tools/EgressMoney/GetDepositsHistoryTool.php';
-require_once __DIR__ . '/Tools/EgressMoney/GetOutflowsByMonthTool.php';
-require_once __DIR__ . '/Tools/EgressMoney/GetCategoriesTool.php';
-require_once __DIR__ . '/Tools/EgressMoney/GetAvailableByDepositsTool.php';
-require_once __DIR__ . '/Tools/InflowMoney/GetInflowTypesTool.php';
-require_once __DIR__ . '/Tools/InflowMoney/InflowMoneyTool.php';
-require_once __DIR__ . '/Tools/SharedFund/SharedFundTool.php';
+try {
+    require_once __DIR__ . '/../../vendor/autoload.php';
 
-$server = Server::builder()
-    ->setServerInfo('Finanzas MCP Server', '1.0.0')
-    ->addTool([GetOutflowTypesTool::class, 'getOutflowTypes'], 'get_outflow_types')
-    ->addTool([GetInflowTypesTool::class, 'getInflowTypes'], 'get_inflow_types')
-    ->addTool([GetCategoriesTool::class, 'getCategories'], 'get_categories')
-    ->addTool([GetAvailableByDepositsTool::class, 'getAvailableByDeposits'], 'get_available_by_deposits')
-    ->addTool([OutflowMoneyTool::class, 'outflowMoney'], 'outflow_money')
-    ->addTool([GetDepositsHistoryTool::class, 'getDepositsHistory'], 'get_deposits_history')
-    ->addTool([GetOutflowsByMonthTool::class, 'getOutflowsByMonth'], 'get_outflows_by_month')
-    ->addTool([InflowMoneyTool::class, 'inflowMoney'], 'inflow_money')
-    ->addTool([SharedFundTool::class, 'addContribution'], 'shared_fund_add')
-    ->addTool([SharedFundTool::class, 'getSummary'], 'shared_fund_summary')
-    ->setSession(new FileSessionStore($sessionDir))
-    ->build();
+    require_once __DIR__ . '/../../src/Database/Connection.php';
+    require_once __DIR__ . '/../../src/MCP/Tools/BaseTool.php';
 
-$isHttp = isset($_SERVER['REQUEST_METHOD']);
-
-if ($isHttp) {
-    header('Content-Type: application/json');
-    header('Access-Control-Allow-Origin: *');
-    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type, Authorization, Mcp-Session-Id');
-
-    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-        http_response_code(204);
-        exit;
+    $sessionDir = '/tmp/finanzas-mcp-sessions';
+    if (!is_dir($sessionDir)) {
+        mkdir($sessionDir, 0755, true);
     }
 
-    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-        echo json_encode([
-            'name' => 'Finanzas MCP Server',
-            'version' => '1.0.0',
-            'status' => 'running'
-        ]);
-        exit;
-    }
+    require_once __DIR__ . '/Tools/EgressMoney/OutflowMoneyTool.php';
+    require_once __DIR__ . '/Tools/EgressMoney/GetDepositsHistoryTool.php';
+    require_once __DIR__ . '/Tools/EgressMoney/GetOutflowsByMonthTool.php';
+    require_once __DIR__ . '/Tools/EgressMoney/GetCategoriesTool.php';
+    require_once __DIR__ . '/Tools/EgressMoney/GetAvailableByDepositsTool.php';
+    require_once __DIR__ . '/Tools/InflowMoney/GetInflowTypesTool.php';
+    require_once __DIR__ . '/Tools/InflowMoney/InflowMoneyTool.php';
+    require_once __DIR__ . '/Tools/SharedFund/SharedFundTool.php';
 
-    $psr17Factory = new Psr17Factory();
-    $serverRequestCreator = new ServerRequestCreator($psr17Factory, $psr17Factory, $psr17Factory, $psr17Factory);
-    $serverRequest = $serverRequestCreator->fromGlobals();
+    $server = Server::builder()
+        ->setServerInfo('Finanzas MCP Server', '1.0.0')
+        ->addTool([GetOutflowTypesTool::class, 'getOutflowTypes'], 'get_outflow_types')
+        ->addTool([GetInflowTypesTool::class, 'getInflowTypes'], 'get_inflow_types')
+        ->addTool([GetCategoriesTool::class, 'getCategories'], 'get_categories')
+        ->addTool([GetAvailableByDepositsTool::class, 'getAvailableByDeposits'], 'get_available_by_deposits')
+        ->addTool([OutflowMoneyTool::class, 'outflowMoney'], 'outflow_money')
+        ->addTool([GetDepositsHistoryTool::class, 'getDepositsHistory'], 'get_deposits_history')
+        ->addTool([GetOutflowsByMonthTool::class, 'getOutflowsByMonth'], 'get_outflows_by_month')
+        ->addTool([InflowMoneyTool::class, 'inflowMoney'], 'inflow_money')
+        ->addTool([SharedFundTool::class, 'addContribution'], 'shared_fund_add')
+        ->addTool([SharedFundTool::class, 'getSummary'], 'shared_fund_summary')
+        ->setSession(new FileSessionStore($sessionDir))
+        ->build();
 
-    $transport = new StreamableHttpTransport(
-        $serverRequest,
-        $psr17Factory,
-        $psr17Factory
-    );
+    $isHttp = isset($_SERVER['REQUEST_METHOD']);
 
-    $response = $server->run($transport);
+    if ($isHttp) {
+        header('Content-Type: application/json');
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type, Authorization, Mcp-Session-Id');
 
-    http_response_code($response->getStatusCode());
-    foreach ($response->getHeaders() as $name => $values) {
-        foreach ($values as $value) {
-            header("$name: $value");
+        if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+            http_response_code(204);
+            exit;
         }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            echo json_encode([
+                'name' => 'Finanzas MCP Server',
+                'version' => '1.0.0',
+                'status' => 'running'
+            ]);
+            exit;
+        }
+
+        $psr17Factory = new Psr17Factory();
+        $serverRequestCreator = new ServerRequestCreator($psr17Factory, $psr17Factory, $psr17Factory, $psr17Factory);
+        $serverRequest = $serverRequestCreator->fromGlobals();
+
+        $transport = new StreamableHttpTransport(
+            $serverRequest,
+            $psr17Factory,
+            $psr17Factory
+        );
+
+        $response = $server->run($transport);
+
+        http_response_code($response->getStatusCode());
+        foreach ($response->getHeaders() as $name => $values) {
+            foreach ($values as $value) {
+                header("$name: $value");
+            }
+        }
+        echo $response->getBody();
+    } else {
+        $transport = new StdioTransport();
+        $server->run($transport);
     }
-    echo $response->getBody();
-} else {
-    $transport = new StdioTransport();
-    $server->run($transport);
+} catch (Throwable $e) {
+    fwrite(STDERR, "ERROR: " . $e->getMessage() . "\n");
+    fwrite(STDERR, "FILE: " . $e->getFile() . ":" . $e->getLine() . "\n");
+    fwrite(STDERR, "TRACE: " . $e->getTraceAsString() . "\n");
+    exit(1);
 }
