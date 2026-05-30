@@ -5,14 +5,14 @@ WORKDIR /var/www/html
 COPY composer.json ./
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        zlib1g-dev libzip-dev libicu-dev libxml2-dev curl libonig-dev \
-    && docker-php-ext-install -j$(nproc) \
-        mysqli pdo pdo_mysql opcache intl pdo_sqlite \
-    && pecl install zip apcu-5.1.23 \
-    && docker-php-ext-enable zip apcu \
-    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* /tmp/* /var/tmp/*
+        zlib1g-dev libzip-dev libicu-dev libxml2-dev curl libonig-dev libsqlite3-dev \
+        && docker-php-ext-install -j$(nproc) \
+            mysqli pdo pdo_mysql opcache intl pdo_sqlite \
+        && pecl install zip \
+        && docker-php-ext-enable zip \
+        && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+        && apt-get clean \
+        && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 COPY . .
 
