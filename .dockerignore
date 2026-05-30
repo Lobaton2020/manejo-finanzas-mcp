@@ -1,0 +1,12 @@
+vendor/
+.git/
+.gitignore
+.env
+.env.*
+*.md
+node_modules/
+.deploy/
+deploy/
+*.log
+.DS_Store
+Thumbs.db
