@@ -45,7 +45,6 @@ Thumbs.db
 composer
 composer-setup*
 finanzas.db
-php.ini
 replicate_db.*
 
 logs

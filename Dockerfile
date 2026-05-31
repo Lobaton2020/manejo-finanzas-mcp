@@ -1,6 +1,8 @@
-FROM php:8.2.31-cli
+FROM php:8.2.31-apache
 
 WORKDIR /var/www/html
+
+COPY php.ini "$PHP_INI_DIR/php.ini"
 
 COPY composer.json ./
 
@@ -10,17 +12,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
             mysqli pdo pdo_mysql opcache intl pdo_sqlite \
         && pecl install zip \
         && docker-php-ext-enable zip \
+        && docker-php-ext-install pdo_sqlite3 \
         && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
         && apt-get clean \
         && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
+RUN mkdir -p /tmp/finanzas-mcp-sessions \
+    && chmod 777 /tmp/finanzas-mcp-sessions
+
 COPY . .
 
-RUN mkdir -p /tmp/finanzas-mcp-sessions \
-    && chmod 777 /tmp/finanzas-mcp-sessions \
-    && composer install --no-dev --no-interaction --optimize-autoloader \
+RUN composer install --no-dev --no-interaction --optimize-autoloader \
     && chmod -R 755 /var/www/html
 
-EXPOSE 8000
+EXPOSE 80
 
-CMD ["php", "src/MCP/Server.php"]
+CMD ["apache2-foreground"]
