@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
             mysqli pdo pdo_mysql opcache intl pdo_sqlite \
         && pecl install zip \
         && docker-php-ext-enable zip \
-        && docker-php-ext-install pdo_sqlite3 \
+        
         && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
         && apt-get clean \
         && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
