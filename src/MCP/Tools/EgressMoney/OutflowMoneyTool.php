@@ -22,7 +22,7 @@ class OutflowMoneyTool extends BaseTool
      *   - amount (required): Amount to withdraw (> 0)
      *   - setDate (optional): Date of outflow (default: current date)
      *   - isInBudget (optional): Whether it's part of a budget (default: true)
-     *   - description (optional): Additional description
+     *   - description (required): Description of the outflow
      *   - idUser (optional): User ID (default: 1)
      *   - dryRun (optional): If true, validates but does not persist (default: false)
      * Returns success with outflow details or validation errors.
@@ -35,7 +35,7 @@ class OutflowMoneyTool extends BaseTool
         float $amount,
         ?string $setDate = null,
         ?bool $isInBudget = true,
-        ?string $description = null,
+        string $description,
         int $idUser = 1,
         bool $dryRun = false
     ): array {

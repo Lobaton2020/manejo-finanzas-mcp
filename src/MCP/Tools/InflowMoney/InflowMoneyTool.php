@@ -18,7 +18,7 @@ class InflowMoneyTool extends BaseTool
      *   - total (required): Total amount of the income (> 0)
      *   - porcents (required): Array of {idPorcent: number, porcent: number} (sum must = 100)
      *   - setDate (optional): Date of inflow (default: current date)
-     *   - description (optional): Additional description
+     *   - description (required): Description of the inflow
      *   - idUser (optional): User ID (default: 1)
      *   - dryRun (optional): If true, validates but does not persist (default: false)
      * Returns success with inflow details or validation errors.
@@ -29,7 +29,7 @@ class InflowMoneyTool extends BaseTool
         float $total,
         array $porcents,
         ?string $setDate = null,
-        ?string $description = null,
+        string $description,
         int $idUser = 1,
         bool $dryRun = false
     ): array {
