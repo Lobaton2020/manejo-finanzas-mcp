@@ -101,8 +101,8 @@ try {
         $server->run($transport);
     }
 } catch (Throwable $e) {
-    fwrite(STDERR, "ERROR: " . $e->getMessage() . "\n");
-    fwrite(STDERR, "FILE: " . $e->getFile() . ":" . $e->getLine() . "\n");
-    fwrite(STDERR, "TRACE: " . $e->getTraceAsString() . "\n");
+    file_put_contents('php://stderr', "ERROR: " . $e->getMessage() . "\n");
+    file_put_contents('php://stderr', "FILE: " . $e->getFile() . ":" . $e->getLine() . "\n");
+    file_put_contents('php://stderr', "TRACE: " . $e->getTraceAsString() . "\n");
     exit(1);
 }
