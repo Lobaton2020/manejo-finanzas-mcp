@@ -21,7 +21,7 @@ class OutflowMoneyTool extends BaseTool
      *   - idPorcent (required): Deposit/percentage source ID
      *   - amount (required): Amount to withdraw (> 0)
      *   - setDate (optional): Date of outflow (default: current date)
-     *   - isInBudget (optional): Whether it's part of a budget (default: true)
+     *   - isInBudget (required): Whether it's part of a budget
      *   - description (required): Description of the outflow
      *   - idUser (optional): User ID (default: 1)
      *   - dryRun (optional): If true, validates but does not persist (default: false)
@@ -34,7 +34,7 @@ class OutflowMoneyTool extends BaseTool
         int $idPorcent,
         float $amount,
         ?string $setDate = null,
-        ?bool $isInBudget = true,
+        bool $isInBudget,
         string $description,
         int $idUser = 1,
         bool $dryRun = false
