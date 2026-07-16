@@ -23,7 +23,10 @@ class InflowMoneyTool extends BaseTool
      *   - dryRun (optional): If true, validates but does not persist (default: false)
      * Returns success with inflow details or validation errors.
      */
-    #[McpTool(name: 'inflow_money')]
+    #[McpTool(
+        name: 'inflow_money',
+        description: 'Crea un nuevo registro de ingreso. Valida: usuario activo, tipo de ingreso válido, depósitos válidos con porcentajes que sumen exactamente 100%. El ingreso se distribuye automáticamente según los porcentajes especificados. Parámetros requeridos: idInflowType, total, porcents (array con idPorcent y porcent), description. Opcionales: setDate, idUser, dryRun.'
+    )]
     public function inflowMoney(
         int $idInflowType,
         float $total,

@@ -27,7 +27,10 @@ class OutflowMoneyTool extends BaseTool
      *   - dryRun (optional): If true, validates but does not persist (default: false)
      * Returns success with outflow details or validation errors.
      */
-    #[McpTool(name: 'outflow_money')]
+    #[McpTool(
+        name: 'outflow_money',
+        description: 'Crea un nuevo registro de egreso/gasto. Valida: usuario activo, tipo de egreso válido, categoría válida para el tipo, depósito válido con suficiente balance. Si el tipo de egreso contiene "inversion", automáticamente crea una inversión. Parámetros requeridos: idOutflowType, idCategory, idPorcent, amount, isInBudget, description. Opcionales: setDate, idUser, dryRun.'
+    )]
     public function outflowMoney(
         int $idOutflowType,
         int $idCategory,

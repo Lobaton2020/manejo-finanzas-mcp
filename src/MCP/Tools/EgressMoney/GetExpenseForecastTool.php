@@ -9,7 +9,10 @@ use Tools\BaseTool;
 
 class GetExpenseForecastTool extends BaseTool
 {
-    #[McpTool(name: 'get_expense_forecast', description: 'Proyecta gastos 6 meses')]
+    #[McpTool(
+        name: 'get_expense_forecast',
+        description: 'Proyecta los gastos de los próximos 6 meses basándose en el promedio histórico mensual (últimos 24 meses). Usa promedio estacional (mismo mes de años anteriores) si hay datos disponibles. Retorna: lista de meses proyectados con el monto estimado y el total.'
+    )]
     public function getExpenseForecast(int $idUser = 1): array
     {
         // Get monthly totals for last 24 months, then average

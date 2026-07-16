@@ -9,7 +9,10 @@ use Tools\BaseTool;
 
 class GetOutflowsByMonthTool extends BaseTool
 {
-    #[McpTool(name: 'get_outflows_by_month')]
+    #[McpTool(
+        name: 'get_outflows_by_month',
+        description: 'Obtiene los egresos de un mes específico. Parámetros: yearMonth (formato YYYY-MM, ej: "2026-03"), idUser (opcional). Retorna: lista de egresos con monto, descripción, fecha, tipo, categoría y depósito.'
+    )]
     public function getOutflowsByMonth(
         string $yearMonth,
         ?int $idUser = 1

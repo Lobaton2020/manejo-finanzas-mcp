@@ -23,7 +23,10 @@ class SharedFundTool extends BaseTool
         file_put_contents(self::DATA_FILE, json_encode($data, JSON_PRETTY_PRINT));
     }
     
-    #[McpTool(name: 'shared_fund_add')]
+    #[McpTool(
+        name: 'shared_fund_add',
+        description: 'Agrega una contribución al fondo compartido (alcancía). Registra cuánto aportó cada persona en un mes específico. Parámetros requeridos: amount (monto), month (1-12), year, who ("andres" o "ivan").'
+    )]
     public function addContribution(
         float $amount,
         int $month,
@@ -58,7 +61,10 @@ class SharedFundTool extends BaseTool
         ];
     }
     
-    #[McpTool(name: 'shared_fund_summary')]
+    #[McpTool(
+        name: 'shared_fund_summary',
+        description: 'Obtiene el resumen del fondo compartido (alcancía). Muestra el total acumulado, el total de cada persona, y el desglose por mes.'
+    )]
     public function getSummary(): array {
         $data = $this->loadData();
         

@@ -15,7 +15,10 @@ class GetOutflowTypesTool extends BaseTool
      * Filters by user ID and only returns types with status = 1 (active).
      * If no user-specific types exist, returns global types (id_user = null).
      */
-    #[McpTool(name: 'get_outflow_types')]
+    #[McpTool(
+        name: 'get_outflow_types',
+        description: 'Obtiene todos los tipos de egreso activos. Los tipos de egreso son categorías de gastos (ej: "Comida", "Transporte", "Entretenimiento"). Si no hay tipos del usuario, retorna tipos globales. Retorna: id, name, status.'
+    )]
     public function getOutflowTypes(int $idUser = 1): array
     {
         return $this->executeWithLogging(function () use ($idUser) {

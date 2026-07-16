@@ -19,7 +19,10 @@ class GetAvailableByDepositsTool extends BaseTool
      * Only returns deposits with status = 1 (active).
      * Uses a single optimized query with subqueries.
      */
-    #[McpTool(name: 'get_available_by_deposits')]
+    #[McpTool(
+        name: 'get_available_by_deposits',
+        description: 'Obtiene todos los depósitos/cuentas activos con su balance financiero. Para cada depósito calcula: total_income (ingresos), total_outflow (egresos), available_balance (balance disponible). Útil para saber cuánto dinero hay disponible en cada cuenta. Retorna: id_porcent, name, total_income, total_outflow, available_balance.'
+    )]
     public function getAvailableByDeposits(int $idUser = 1): array
     {
         return $this->executeWithLogging(function () use ($idUser) {
