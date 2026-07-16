@@ -177,27 +177,6 @@ Proyecta los gastos de los próximos 6 meses basándose en promedio histórico.
 
 ---
 
-### shared_fund_summary
-
-Obtiene el resumen del fondo compartido (alcancía).
-
-**Parámetros:** Sin parámetros
-
-**Respuesta exitosa:**
-```json
-{
-  "total_acumulado": 1500000,
-  "andres": 800000,
-  "ivan": 700000,
-  "meses": {
-    "2026-01": { "andres": 200000, "ivan": 200000, "total": 400000 },
-    "2026-02": { "andres": 200000, "ivan": 200000, "total": 400000 }
-  }
-}
-```
-
----
-
 ## Action Tools
 
 ### inflow_money
@@ -301,44 +280,6 @@ Crea un nuevo registro de egreso.
     "deposit": "Cuenta Principal"
   },
   "investment_created": false
-}
-```
-
----
-
-### shared_fund_add
-
-Agrega una contribución al fondo compartido.
-
-**Parámetros:**
-| Nombre | Tipo | Requerido | Default | Descripción |
-|--------|------|-----------|---------|-------------|
-| amount | float | Sí | - | Monto de la contribución |
-| month | int | Sí | - | Mes (1-12) |
-| year | int | Sí | - | Año (ej: 2026) |
-| who | string | Sí | - | "andres" o "ivan" |
-
-**Ejemplo de llamada:**
-```json
-{
-  "tool": "shared_fund_add",
-  "amount": 100000,
-  "month": 3,
-  "year": 2026,
-  "who": "andres"
-}
-```
-
-**Respuesta exitosa:**
-```json
-{
-  "success": true,
-  "message": "Contribución agregada. andres aportó $100,000 al fondo compartido (2026-3)",
-  "data": {
-    "andres": 100000,
-    "ivan": 0,
-    "total": 100000
-  }
 }
 ```
 

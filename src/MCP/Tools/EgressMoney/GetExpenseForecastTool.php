@@ -9,9 +9,30 @@ use Tools\BaseTool;
 
 class GetExpenseForecastTool extends BaseTool
 {
+    /**
+     * Proyecta los gastos de los próximos 6 meses.
+     * 
+     * ¿Para qué sirve?: Planificar presupuesto futuro basándote en patrones históricos.
+     * 
+     * Lógica:
+     * 1. Obtiene los últimos 24 meses de egresos (solo is_in_budget = 1)
+     * 2. Calcula el promedio por mes (ej: promedio de todos los enero, todos los febrero, etc.)
+     * 3. Proyecta los próximos 6 meses usando esos promedios
+     * 4. Si no hay dato histórico para un mes, usa el promedio general
+     * 
+     * Método: "seasonal_avg" (promedio estacional)
+     * 
+     * Limitaciones:
+     * - Solo usa egresos marcados como "en presupuesto"
+     * - No considera gastos nuevos o cambios de patrón
+     * - Asume comportamiento futuro similar al histórico
+     * 
+     * @param int $idUser ID del usuario (default: 1)
+     * @return array Proyección con: forecast (lista por mes), total (suma 6 meses), method
+     */
     #[McpTool(
         name: 'get_expense_forecast',
-        description: 'Proyecta los gastos de los próximos 6 meses basándose en el promedio histórico mensual (últimos 24 meses). Usa promedio estacional (mismo mes de años anteriores) si hay datos disponibles. Retorna: lista de meses proyectados con el monto estimado y el total.'
+        description: 'Proyecta los gastos de los próximos 6 meses usando promedio estacional (mismo mes de años anteriores). Útil para planificación presupuestal.'
     )]
     public function getExpenseForecast(int $idUser = 1): array
     {

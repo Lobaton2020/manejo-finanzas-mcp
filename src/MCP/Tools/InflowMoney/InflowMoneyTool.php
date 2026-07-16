@@ -10,18 +10,34 @@ use Tools\BaseTool;
 class InflowMoneyTool extends BaseTool
 {
     /**
-     * Create a new inflow (income) record.
-     * Validates: User exists and is active, Inflow type exists and is active,
-     * Each deposit exists/is active/belongs to user, Sum of percentages = 100.
-     * Parameters:
-     *   - idInflowType (required): Inflow type ID
-     *   - total (required): Total amount of the income (> 0)
-     *   - porcents (required): Array of {idPorcent: number, porcent: number} (sum must = 100)
-     *   - setDate (optional): Date of inflow (default: current date)
-     *   - description (required): Description of the inflow
-     *   - idUser (optional): User ID (default: 1)
-     *   - dryRun (optional): If true, validates but does not persist (default: false)
-     * Returns success with inflow details or validation errors.
+     * Registra un nuevo ingreso (dinero que entra).
+     * 
+     * ¿Para qué sirve?: Registrar salarial, bonos, freelance, o cualquier dinero que recibas.
+     * 
+     * Validaciones:
+     * 1. Usuario existe y está activo
+     * 2. Tipo de ingreso existe y está activo
+     * 3. Cada depósito existe, está activo y pertenece al usuario
+     * 4. La suma de porcentajes debe ser exactamente 100
+     * 
+     * Importante: Los ingresos se distribuyen automáticamente entre depósitos según los porcentajes.
+     * Ejemplo: Si recibes $1,000,000 y pones 70% a "cuenta principal" y 30% a "ahorros",
+     *          se registran $700,000 en "cuenta principal" y $300,000 en "ahorros".
+     * 
+     * Flujo obligatorio:
+     * 1. Llama get_inflow_types → obtener idInflowType válido
+     * 2. Llama get_available_by_deposits → obtener idPorcent válido
+     * 3. Llama inflow_money con los IDs obtenidos
+     * 
+     * @param int $idInflowType ID del tipo de ingreso (obtenido de get_inflow_types)
+     * @param float $total Monto total del ingreso (debe ser > 0)
+     * @param array $porcents Array de objetos {idPorcent: int, porcent: int}. La suma debe ser 100.
+     *                         Ejemplo: [{"idPorcent": 1, "porcent": 70}, {"idPorcent": 2, "porcent": 30}]
+     * @param string|null $setDate Fecha del ingreso (YYYY-MM-DD). Default: fecha actual
+     * @param string $description Descripción del ingreso
+     * @param int $idUser ID del usuario (default: 1)
+     * @param bool $dryRun true = solo validar sin guardar, false = guardar en BD
+     * @return array Resultado con success=true o errores de validación
      */
     #[McpTool(
         name: 'inflow_money',

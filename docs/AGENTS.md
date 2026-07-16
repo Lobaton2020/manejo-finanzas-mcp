@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-MCP (Model Context Protocol) server for personal finance management. Handles income, expenses, budgets, and shared fund tracking via a standardized MCP interface.
+MCP (Model Context Protocol) server for personal finance management. Handles income and expenses tracking via a standardized MCP interface.
 
 ## Tech Stack
 
@@ -23,8 +23,7 @@ manejo-finanzas-mcp/
 │       └── Tools/
 │           ├── BaseTool.php      # Base class with DB access & helpers
 │           ├── EgressMoney/      # Expense-related tools
-│           ├── InflowMoney/      # Income-related tools
-│           └── SharedFund/       # Shared fund (alcancía) tools
+│           └── InflowMoney/      # Income-related tools
 ├── index.php                     # HTTP entry point
 ├── composer.json
 └── .env                         # Database configuration
@@ -53,7 +52,6 @@ php -S 127.0.0.1:8080 -t .
 | `get_deposits_history` | Monthly income/expense summary |
 | `get_outflows_by_month` | List expenses for a specific month |
 | `get_expense_forecast` | Project next 6 months expenses |
-| `shared_fund_summary` | Shared fund (alcancía) balance |
 
 ### Action Tools (Write)
 
@@ -61,7 +59,6 @@ php -S 127.0.0.1:8080 -t .
 |------|---------|
 | `inflow_money` | Create income record |
 | `outflow_money` | Create expense record |
-| `shared_fund_add` | Add contribution to shared fund |
 
 ## Workflow for Creating Transactions
 

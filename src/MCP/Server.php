@@ -18,7 +18,7 @@ use Tools\EgressMoney\OutflowMoneyTool;
 use Tools\EgressMoney\GetDepositsHistoryTool;
 use Tools\EgressMoney\GetOutflowsByMonthTool;
 use Tools\InflowMoney\InflowMoneyTool;
-use Tools\SharedFund\SharedFundTool;
+
 
 try {
     require_once __DIR__ . '/../../vendor/autoload.php';
@@ -38,7 +38,7 @@ try {
     require_once __DIR__ . '/Tools/EgressMoney/GetAvailableByDepositsTool.php';
     require_once __DIR__ . '/Tools/InflowMoney/GetInflowTypesTool.php';
     require_once __DIR__ . '/Tools/InflowMoney/InflowMoneyTool.php';
-    require_once __DIR__ . '/Tools/SharedFund/SharedFundTool.php';
+
 
     $server = Server::builder()
         ->setServerInfo('Finanzas MCP Server', '1.0.0')
@@ -50,8 +50,7 @@ try {
         ->addTool([GetDepositsHistoryTool::class, 'getDepositsHistory'], 'get_deposits_history')
         ->addTool([GetOutflowsByMonthTool::class, 'getOutflowsByMonth'], 'get_outflows_by_month')
         ->addTool([InflowMoneyTool::class, 'inflowMoney'], 'inflow_money')
-        ->addTool([SharedFundTool::class, 'addContribution'], 'shared_fund_add')
-        ->addTool([SharedFundTool::class, 'getSummary'], 'shared_fund_summary')
+
         ->setSession(new FileSessionStore($sessionDir))
         ->build();
 

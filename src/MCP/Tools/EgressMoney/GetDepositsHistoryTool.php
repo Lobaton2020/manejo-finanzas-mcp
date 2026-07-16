@@ -9,7 +9,27 @@ use Tools\BaseTool;
 
 class GetDepositsHistoryTool extends BaseTool
 {
-    #[McpTool(name: 'get_deposits_history', description: 'Obtiene el historial global de ingresos y egresos por mes. Devuelve totales mensuales de ingresos (excluyendo retornos de inversión) y egresos (solo los en presupuesto).')]
+    /**
+     * Obtiene el historial mensual de ingresos vs egresos.
+     * 
+     * ¿Para qué sirve?: Ver la tendencia financiera mes a mes. Muestra:
+     * - Ingresos totales del mes
+     * - Egresos (solo los marcados como "en presupuesto") del mes
+     * - Balance acumulado (histórico)
+     * 
+     * Lógica:
+     * 1. Agrupa ingresos por mes (excluye tipo 8 = Retorno inversión)
+     * 2. Agrupa egresos por mes (solo is_in_budget = 1)
+     * 3. Combina todos los meses y calcula balance acumulado
+     * 
+     * Diferencia con get_outflows_by_month:
+     *   - get_deposits_history: resume totales por mes (para gráficos/tendencias)
+     *   - get_outflows_by_month: lista detallada de cada egreso
+     * 
+     * @param int $idUser ID del usuario (default: 1)
+     * @return array Lista de meses con: date, income, expense, balance
+     */
+    #[McpTool(name: 'get_deposits_history', description: 'Obtiene el historial mensual resumido: ingresos totales, egresos en presupuesto, y balance acumulado por mes. Útil para gráficos y tendencias.')]
     public function getDepositsHistory(int $idUser = 1): array
     {
         return $this->executeWithLogging(function () use ($idUser) {

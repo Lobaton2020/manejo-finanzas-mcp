@@ -10,10 +10,28 @@ use Tools\BaseTool;
 class GetCategoriesTool extends BaseTool
 {
     /**
-     * Get outflow categories. 
-     * Depends on outflow type - use idOutflowType parameter to filter by type.
+     * Obtiene las categorías de egreso.
+     * 
+     * ¿Para qué sirve?: Las categorías dependen del tipo de egreso. Por ejemplo, 
+     * si el tipo es "Gastos", las categorías pueden ser "Comida", "Transporte", etc.
+     * Si el tipo es "Inversión", las categorías pueden ser "Acciones", "Bienes raíces", etc.
+     * 
+     * Lógica:
+     * 1. Si se pasa idOutflowType, filtra solo categorías de ese tipo
+     * 2. Solo retorna las que tienen status = 1
+     * 
+     * Importante: Una categoría pertenece a un tipo de egreso específico.
+     * No puedes usar cualquier categoría con cualquier tipo.
+     * 
+     * Ejemplo de uso:
+     *   1. Llama get_outflow_types para obtener los tipos
+     *   2. Llama get_categories con el idOutflowType elegido
+     *   3. Usa el idCategory retornado para outflow_money
+     * 
+     * @param int|null $idOutflowType Filtrar por tipo de egreso (opcional)
+     * @return array Lista de categorías con: id, name, type_id
      */
-    #[McpTool(name: 'get_categories', description: 'Get all active categories for outflows. Categories are dependent on outflow types - use idOutflowType parameter to filter. Returns category ID, name, and associated outflow type ID. Only returns categories with status = 1 (active).')]
+    #[McpTool(name: 'get_categories', description: 'Obtiene las categorías de egreso. Las categorías dependen del tipo de egreso - usa idOutflowType para filtrar. Retorna: id, name, type_id. Solo status=1.')]
     public function getCategories(?int $idOutflowType = null): array
     {
         return $this->executeWithLogging(function () use ($idOutflowType) {

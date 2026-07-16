@@ -10,14 +10,27 @@ use Tools\BaseTool;
 class GetAvailableByDepositsTool extends BaseTool
 {
     /**
-     * Get all active deposits (porcents) with their financial summary.
-     * Calculates for each deposit:
-     *   - total_income = SUM(inflow.total * inflow_porcent.porcent / 100)
-     *   - total_outflow = SUM(outflow.amount)
-     *   - available_balance = total_income - total_outflow
-     * Requires idUser parameter (default: 1).
-     * Only returns deposits with status = 1 (active).
-     * Uses a single optimized query with subqueries.
+     * Obtiene los depósitos/cuentas con su balance disponible.
+     * 
+     * ¿Para qué sirve?: Saber cuánto dinero tienes disponible en cada cuenta/depósito.
+     * Es CRÍTICO para validar que tienes suficiente dinero antes de hacer un egreso.
+     * 
+     * Lógica:
+     * 1. Para cada depósito (cuenta), calcula:
+     *    - total_income: suma de todos los ingresos distribuidos a ese depósito
+     *    - total_outflow: suma de todos los egresos de ese depósito
+     *    - available_balance: total_income - total_outflow
+     * 2. Solo retorna depósitos con status = 1
+     * 
+     * Importante: El balance se calcula en tiempo real desde la BD.
+     * 
+     * Ejemplo de uso:
+     *   1. Antes de outflow_money, llama esta función
+     *   2. Verifica que el monto del egreso <= available_balance del idPorcent chosen
+     *   3. Usa el id_porcent retornado para outflow_money
+     * 
+     * @param int $idUser ID del usuario (default: 1)
+     * @return array Lista de depósitos con: id_porcent, name, total_income, total_outflow, available_balance
      */
     #[McpTool(
         name: 'get_available_by_deposits',

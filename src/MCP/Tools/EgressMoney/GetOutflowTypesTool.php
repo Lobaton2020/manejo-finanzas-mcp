@@ -10,10 +10,20 @@ use Tools\BaseTool;
 class GetOutflowTypesTool extends BaseTool
 {
     /**
-     * Get all active outflow types for the authenticated user.
-     * Returns a list of expense categories (e.g., "Food", "Transportation", "Entertainment").
-     * Filters by user ID and only returns types with status = 1 (active).
-     * If no user-specific types exist, returns global types (id_user = null).
+     * Obtiene los tipos de egreso activos.
+     * 
+     * ¿Para qué sirve?: Necesitas saber qué tipos de gastos existen antes de crear un egreso.
+     * 
+     * Lógica:
+     * 1. Busca tipos de egreso del usuario (id_user = $idUser)
+     * 2. Si no hay, busca tipos globales (id_user = null)
+     * 3. Solo retorna los que tienen status = 1
+     * 
+     * Ejemplo de uso:
+     *   - Antes de llamar a outflow_money, llama esta función para obtener idOutflowType válido
+     * 
+     * @param int $idUser ID del usuario (default: 1)
+     * @return array Lista de tipos con: id, name, status
      */
     #[McpTool(
         name: 'get_outflow_types',

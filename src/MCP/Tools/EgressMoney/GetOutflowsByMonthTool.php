@@ -9,9 +9,27 @@ use Tools\BaseTool;
 
 class GetOutflowsByMonthTool extends BaseTool
 {
+    /**
+     * Obtiene los egresos detallados de un mes específico.
+     * 
+     * ¿Para qué sirve?: Ver qué gastaste en un mes específico, con detalle de cada egreso.
+     * 
+     * Lógica:
+     * 1. Filtra egresos por mes (formato YYYY-MM)
+     * 2. JOIN con tablas relacionadas para traer nombres (tipo, categoría, depósito)
+     * 3. Ordena por fecha descendente
+     * 
+     * Diferencia con get_deposits_history:
+     *   - get_deposits_history: resume totales por mes (para gráficos/tendencias)
+     *   - get_outflows_by_month: lista detallada de cada egreso
+     * 
+     * @param string $yearMonth Mes en formato YYYY-MM (ej: "2026-03")
+     * @param int|null $idUser ID del usuario (default: 1)
+     * @return array Egresos del mes con: id_outflow, amount, description, set_date, is_in_budget, outflow_type, category, deposit
+     */
     #[McpTool(
         name: 'get_outflows_by_month',
-        description: 'Obtiene los egresos de un mes específico. Parámetros: yearMonth (formato YYYY-MM, ej: "2026-03"), idUser (opcional). Retorna: lista de egresos con monto, descripción, fecha, tipo, categoría y depósito.'
+        description: 'Obtiene la lista detallada de egresos de un mes específico. Incluye monto, descripción, fecha, tipo, categoría y depósito de cada egreso.'
     )]
     public function getOutflowsByMonth(
         string $yearMonth,
