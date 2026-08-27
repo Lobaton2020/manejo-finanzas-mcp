@@ -24,12 +24,15 @@ class OutflowMoneyTool extends BaseTool
      *   - isInBudget (required): Whether it's part of a budget
      *   - description (required): Description of the outflow
      *   - idUser (optional): User ID (default: 1)
+     *   - idGroupInvestment (optional): Investment group ID. Only applied when the
+     *     outflow type name contains "inversion" (case-insensitive), matching the
+     *     UI behavior in outflows/create.php. Must belong to idUser when provided.
      *   - dryRun (optional): If true, validates but does not persist (default: false)
      * Returns success with outflow details or validation errors.
      */
     #[McpTool(
         name: 'outflow_money',
-        description: 'Crea un nuevo registro de egreso/gasto. Valida: usuario activo, tipo de egreso válido, categoría válida para el tipo, depósito válido con suficiente balance. Si el tipo de egreso contiene "inversion", automáticamente crea una inversión. Parámetros requeridos: idOutflowType, idCategory, idPorcent, amount, isInBudget, description. Opcionales: setDate, idUser, dryRun.'
+        description: 'Crea un nuevo registro de egreso/gasto. Valida: usuario activo, tipo de egreso válido, categoría válida para el tipo, depósito válido con suficiente balance. Si el tipo de egreso contiene "inversion", automáticamente crea una inversión y, si se envia idGroupInvestment, lo asocia al grupo (debe pertenecer al usuario). Parámetros requeridos: idOutflowType, idCategory, idPorcent, amount, isInBudget, description. Opcionales: setDate, idUser, idGroupInvestment, dryRun.'
     )]
     public function outflowMoney(
         int $idOutflowType,
@@ -40,9 +43,10 @@ class OutflowMoneyTool extends BaseTool
         bool $isInBudget,
         string $description,
         int $idUser = 1,
+        ?int $idGroupInvestment = null,
         bool $dryRun = false
     ): array {
-        return $this->executeWithLogging(function () use ($idOutflowType, $idCategory, $idPorcent, $amount, $setDate, $isInBudget, $description, $idUser, $dryRun) {
+        return $this->executeWithLogging(function () use ($idOutflowType, $idCategory, $idPorcent, $amount, $setDate, $isInBudget, $description, $idUser, $idGroupInvestment, $dryRun) {
             date_default_timezone_set('America/Bogota');
             $setDate = $setDate ?? date('Y-m-d');
 
@@ -104,6 +108,31 @@ class OutflowMoneyTool extends BaseTool
                 ];
             }
 
+            $isInvestment = stripos($outflowType->name, 'inversion') !== false;
+
+            if ($idGroupInvestment !== null) {
+                if (!$isInvestment) {
+                    return [
+                        'content' => [
+                            'type' => 'text',
+                            'text' => 'Error: idGroupInvestment solo aplica cuando el tipo de egreso contiene "inversion".'
+                        ]
+                    ];
+                }
+                $group = $this->table('group_investments')
+                    ->where('id_group_investment', $idGroupInvestment)
+                    ->where('id_user', $idUser)
+                    ->first();
+                if (!$group) {
+                    return [
+                        'content' => [
+                            'type' => 'text',
+                            'text' => 'Error: El grupo de inversion no existe o no pertenece al usuario.'
+                        ]
+                    ];
+                }
+            }
+
             if ($amount <= 0) {
                 return [
                     'content' => [
@@ -160,8 +189,9 @@ class OutflowMoneyTool extends BaseTool
                                 'description' => $description ?? '',
                                 'set_date' => $setDate,
                                 'is_in_budget' => $isInBudget ? 1 : 0,
+                                'id_group_investment' => $isInvestment ? $idGroupInvestment : null,
                             ],
-                            'investment_will_be_created' => stripos($outflowType->name, 'inversion') !== false,
+                            'investment_will_be_created' => $isInvestment,
                         ], JSON_PRETTY_PRINT)
                     ]
                 ];
@@ -182,13 +212,19 @@ class OutflowMoneyTool extends BaseTool
             ]);
 
             $investmentCreated = false;
-            if (stripos($outflowType->name, 'inversion') !== false) {
-                $this->table('investments')->insert([
+            $linkedGroupId = null;
+            if ($isInvestment) {
+                $investmentData = [
                     'id_outflow' => $outflowId,
                     'init_date' => $setDate,
                     'amount' => $amount,
                     'state' => 'activa',
-                ]);
+                ];
+                if ($idGroupInvestment !== null) {
+                    $investmentData['id_group_investment'] = $idGroupInvestment;
+                    $linkedGroupId = $idGroupInvestment;
+                }
+                $this->table('investments')->insert($investmentData);
                 $investmentCreated = true;
             }
 
@@ -207,6 +243,7 @@ class OutflowMoneyTool extends BaseTool
                             'deposit' => $deposit->name,
                         ],
                         'investment_created' => $investmentCreated,
+                        'id_group_investment' => $linkedGroupId,
                     ], JSON_PRETTY_PRINT)
                 ]
             ];
@@ -219,6 +256,7 @@ class OutflowMoneyTool extends BaseTool
             'isInBudget' => $isInBudget,
             'description' => $description,
             'idUser' => $idUser,
+            'idGroupInvestment' => $idGroupInvestment,
             'dryRun' => $dryRun
         ]);
     }

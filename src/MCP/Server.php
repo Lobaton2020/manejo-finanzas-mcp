@@ -17,6 +17,7 @@ use Tools\EgressMoney\GetAvailableByDepositsTool;
 use Tools\EgressMoney\OutflowMoneyTool;
 use Tools\EgressMoney\GetDepositsHistoryTool;
 use Tools\EgressMoney\GetOutflowsByMonthTool;
+use Tools\EgressMoney\GetInvestmentGroupsTool;
 use Tools\InflowMoney\InflowMoneyTool;
 
 
@@ -36,6 +37,7 @@ try {
     require_once __DIR__ . '/Tools/EgressMoney/GetOutflowsByMonthTool.php';
     require_once __DIR__ . '/Tools/EgressMoney/GetCategoriesTool.php';
     require_once __DIR__ . '/Tools/EgressMoney/GetAvailableByDepositsTool.php';
+    require_once __DIR__ . '/Tools/EgressMoney/GetInvestmentGroupsTool.php';
     require_once __DIR__ . '/Tools/InflowMoney/GetInflowTypesTool.php';
     require_once __DIR__ . '/Tools/InflowMoney/InflowMoneyTool.php';
 
@@ -49,6 +51,7 @@ try {
         ->addTool([OutflowMoneyTool::class, 'outflowMoney'], 'outflow_money')
         ->addTool([GetDepositsHistoryTool::class, 'getDepositsHistory'], 'get_deposits_history')
         ->addTool([GetOutflowsByMonthTool::class, 'getOutflowsByMonth'], 'get_outflows_by_month')
+        ->addTool([GetInvestmentGroupsTool::class, 'getInvestmentGroups'], 'get_investment_groups')
         ->addTool([InflowMoneyTool::class, 'inflowMoney'], 'inflow_money')
 
         ->setSession(new FileSessionStore($sessionDir))
