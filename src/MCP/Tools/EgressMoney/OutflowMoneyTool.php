@@ -197,35 +197,45 @@ class OutflowMoneyTool extends BaseTool
                 ];
             }
 
-            $outflowId = $this->table('outflows')->insertGetId([
-                'id_outflow_type' => $idOutflowType,
-                'id_category' => $idCategory,
-                'id_porcent' => $idPorcent,
-                'id_user' => $idUser,
-                'amount' => $amount,
-                'description' => $description ?? '',
-                'set_date' => $setDate,
-                'is_in_budget' => $isInBudget ? 1 : 0,
-                'status' => 1,
-                'create_at' => date('Y-m-d H:i:s'),
-                'update_at' => date('Y-m-d H:i:s'),
-            ]);
-
             $investmentCreated = false;
             $linkedGroupId = null;
-            if ($isInvestment) {
-                $investmentData = [
-                    'id_outflow' => $outflowId,
-                    'init_date' => $setDate,
+
+            $outflowId = $this->transaction(function () use ($idOutflowType, $idCategory, $idPorcent, $idUser, $amount, $description, $setDate, $isInBudget, $isInvestment, $idGroupInvestment) {
+                $newOutflowId = $this->table('outflows')->insertGetId([
+                    'id_outflow_type' => $idOutflowType,
+                    'id_category' => $idCategory,
+                    'id_porcent' => $idPorcent,
+                    'id_user' => $idUser,
                     'amount' => $amount,
-                    'state' => 'activa',
-                ];
-                if ($idGroupInvestment !== null) {
-                    $investmentData['id_group_investment'] = $idGroupInvestment;
-                    $linkedGroupId = $idGroupInvestment;
+                    'description' => $description ?? '',
+                    'set_date' => $setDate,
+                    'is_in_budget' => $isInBudget ? 1 : 0,
+                    'status' => 1,
+                    'create_at' => date('Y-m-d H:i:s'),
+                    'update_at' => date('Y-m-d H:i:s'),
+                ]);
+
+                if ($isInvestment) {
+                    $now = date('Y-m-d H:i:s');
+                    $investmentData = [
+                        'id_outflow' => $newOutflowId,
+                        'state'      => 'Creado',
+                        'risk_level' => 'Conservador',
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                    if ($idGroupInvestment !== null) {
+                        $investmentData['id_group_investment'] = $idGroupInvestment;
+                    }
+                    $this->table('investments')->insert($investmentData);
                 }
-                $this->table('investments')->insert($investmentData);
+
+                return $newOutflowId;
+            });
+
+            if ($isInvestment) {
                 $investmentCreated = true;
+                $linkedGroupId = $idGroupInvestment;
             }
 
             return [
