@@ -11,21 +11,11 @@ class GetDepositsHistoryTool extends BaseTool
 {
     /**
      * Obtiene el historial mensual de ingresos vs egresos.
-     * 
-     * ¿Para qué sirve?: Ver la tendencia financiera mes a mes. Muestra:
-     * - Ingresos totales del mes
-     * - Egresos (solo los marcados como "en presupuesto") del mes
-     * - Balance acumulado (histórico)
-     * 
-     * Lógica:
-     * 1. Agrupa ingresos por mes (excluye tipo 8 = Retorno inversión)
-     * 2. Agrupa egresos por mes (solo is_in_budget = 1)
-     * 3. Combina todos los meses y calcula balance acumulado
-     * 
-     * Diferencia con get_outflows_by_month:
-     *   - get_deposits_history: resume totales por mes (para gráficos/tendencias)
-     *   - get_outflows_by_month: lista detallada de cada egreso
-     * 
+     * ¿Para qué sirve?: Ver la tendencia financiera mes a mes.
+     * - Agrupa ingresos por mes (excluye tipo 8 = Retorno inversión)
+     * - Agrupa egresos por mes (solo is_in_budget = 1)
+     * - Calcula balance acumulado
+     *
      * @param int $idUser ID del usuario (default: 1)
      * @return array Lista de meses con: date, income, expense, balance
      */
@@ -33,55 +23,50 @@ class GetDepositsHistoryTool extends BaseTool
     public function getDepositsHistory(int $idUser = 1): array
     {
         return $this->executeWithLogging(function () use ($idUser) {
-            // Get monthly inflows (excluding type 8 - Retorno inversión)
+            $this->debug('getDepositsHistory start', compact('idUser'));
+
             $inflows = $this->table('inflows')
                 ->where('inflows.id_user', $idUser)
                 ->where('inflows.status', 1)
                 ->where('inflows.id_inflow_type', '!=', 8)
-                ->selectRaw('DATE_FORMAT(inflows.set_date, "%Y-%m") as month')
-                ->selectRaw('COALESCE(SUM(inflows.total), 0) as total_income')
-                ->groupBy('month')
-                ->orderBy('month')
+                ->select('inflows.set_date', 'inflows.total')
                 ->get()
-                ->keyBy('month')
                 ->toArray();
 
-            // Get monthly outflows (only is_in_budget = 1)
             $outflows = $this->table('outflows')
                 ->where('outflows.id_user', $idUser)
                 ->where('outflows.status', 1)
                 ->where('outflows.is_in_budget', 1)
-                ->selectRaw('DATE_FORMAT(outflows.set_date, "%Y-%m") as month')
-                ->selectRaw('COALESCE(SUM(outflows.amount), 0) as total_expense')
-                ->groupBy('month')
-                ->orderBy('month')
+                ->select('outflows.set_date', 'outflows.amount')
                 ->get()
-                ->keyBy('month')
                 ->toArray();
 
-            // Get all unique months
-            $allMonths = array_unique(array_merge(
-                array_keys($inflows),
-                array_keys($outflows)
-            ));
-            sort($allMonths);
+            $byMonth = [];
+            foreach ($inflows as $row) {
+                $month = substr((string) $row->set_date, 0, 7);
+                $byMonth[$month]['income'] = ($byMonth[$month]['income'] ?? 0) + (float) $row->total;
+            }
+            foreach ($outflows as $row) {
+                $month = substr((string) $row->set_date, 0, 7);
+                $byMonth[$month]['expense'] = ($byMonth[$month]['expense'] ?? 0) + (float) $row->amount;
+            }
+            ksort($byMonth);
 
-            // Build result
             $history = [];
-            $balance = 0;
-
-            foreach ($allMonths as $month) {
-                $income = isset($inflows[$month]) ? round((float) $inflows[$month]->total_income, 2) : 0;
-                $expense = isset($outflows[$month]) ? round((float) $outflows[$month]->total_expense, 2) : 0;
+            $balance = 0.0;
+            foreach ($byMonth as $month => $values) {
+                $income = round((float) ($values['income'] ?? 0), 2);
+                $expense = round((float) ($values['expense'] ?? 0), 2);
                 $balance = round($balance + $income - $expense, 2);
-
                 $history[] = [
-                    'date' => $month,
-                    'income' => $income,
+                    'date'    => $month,
+                    'income'  => $income,
                     'expense' => $expense,
                     'balance' => $balance,
                 ];
             }
+
+            $this->debug('getDepositsHistory result', ['months' => count($history)]);
 
             return [
                 'content' => [

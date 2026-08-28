@@ -9,24 +9,6 @@ use Tools\BaseTool;
 
 class GetOutflowsByMonthTool extends BaseTool
 {
-    /**
-     * Obtiene los egresos detallados de un mes específico.
-     * 
-     * ¿Para qué sirve?: Ver qué gastaste en un mes específico, con detalle de cada egreso.
-     * 
-     * Lógica:
-     * 1. Filtra egresos por mes (formato YYYY-MM)
-     * 2. JOIN con tablas relacionadas para traer nombres (tipo, categoría, depósito)
-     * 3. Ordena por fecha descendente
-     * 
-     * Diferencia con get_deposits_history:
-     *   - get_deposits_history: resume totales por mes (para gráficos/tendencias)
-     *   - get_outflows_by_month: lista detallada de cada egreso
-     * 
-     * @param string $yearMonth Mes en formato YYYY-MM (ej: "2026-03")
-     * @param int|null $idUser ID del usuario (default: 1)
-     * @return array Egresos del mes con: id_outflow, amount, description, set_date, is_in_budget, outflow_type, category, deposit
-     */
     #[McpTool(
         name: 'get_outflows_by_month',
         description: 'Obtiene la lista detallada de egresos de un mes específico. Incluye monto, descripción, fecha, tipo, categoría y depósito de cada egreso.'
@@ -36,6 +18,8 @@ class GetOutflowsByMonthTool extends BaseTool
         ?int $idUser = 1
     ): array {
         return $this->executeWithLogging(function () use ($yearMonth, $idUser) {
+            $this->debug('getOutflowsByMonth start', compact('yearMonth', 'idUser'));
+
             if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $yearMonth)) {
                 return [
                     'content' => [
@@ -45,7 +29,7 @@ class GetOutflowsByMonthTool extends BaseTool
                 ];
             }
 
-            $outflows = $this->table('outflows')
+            $rows = $this->table('outflows')
                 ->select([
                     'outflows.id_outflow',
                     'outflows.amount',
@@ -61,11 +45,24 @@ class GetOutflowsByMonthTool extends BaseTool
                 ->join('porcents', 'outflows.id_porcent', '=', 'porcents.id_porcent')
                 ->where('outflows.id_user', $idUser)
                 ->where('outflows.status', 1)
-                ->whereRaw("DATE_FORMAT(outflows.set_date, '%Y-%m') = ?", [$yearMonth])
+                ->where('outflows.set_date', 'like', $yearMonth . '%')
                 ->orderBy('outflows.set_date', 'desc')
                 ->get();
 
-            if ($outflows->isEmpty()) {
+            $outflows = $rows->map(function ($r) {
+                return [
+                    'id_outflow'   => (int) $r->id_outflow,
+                    'amount'       => (float) $r->amount,
+                    'description'  => $r->description,
+                    'set_date'     => $r->set_date,
+                    'is_in_budget' => (int) $r->is_in_budget,
+                    'outflow_type' => $r->outflow_type,
+                    'category'     => $r->category,
+                    'deposit'      => $r->deposit,
+                ];
+            })->all();
+
+            if (empty($outflows)) {
                 return [
                     'content' => [
                         'type' => 'text',
@@ -77,7 +74,8 @@ class GetOutflowsByMonthTool extends BaseTool
                 ];
             }
 
-            $total = $outflows->sum('amount');
+            $total = 0.0;
+            foreach ($outflows as $o) { $total += $o['amount']; }
 
             return [
                 'content' => [
@@ -85,8 +83,8 @@ class GetOutflowsByMonthTool extends BaseTool
                     'text' => json_encode([
                         'month' => $yearMonth,
                         'total_outflows' => $total,
-                        'count' => $outflows->count(),
-                        'outflows' => $outflows->toArray()
+                        'count' => count($outflows),
+                        'outflows' => $outflows
                     ], JSON_PRETTY_PRINT)
                 ]
             ];

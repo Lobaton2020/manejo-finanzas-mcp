@@ -47,8 +47,8 @@ class InflowMoneyTool extends BaseTool
         int $idInflowType,
         float $total,
         array $porcents,
-        ?string $setDate = null,
         string $description,
+        ?string $setDate = null,
         int $idUser = 1,
         bool $dryRun = false
     ): array {
@@ -61,12 +61,7 @@ class InflowMoneyTool extends BaseTool
                 ->first();
 
             if (!$user) {
-                return [
-                    'content' => [
-                        'type' => 'text',
-                        'text' => 'Error: El usuario no existe o está inactivo.'
-                    ]
-                ];
+                return $this->validationError('El usuario no existe o esta inactivo.');
             }
 
             $inflowType = $this->table('inflowtypes')
@@ -75,42 +70,22 @@ class InflowMoneyTool extends BaseTool
                 ->first();
 
             if (!$inflowType) {
-                return [
-                    'content' => [
-                        'type' => 'text',
-                        'text' => 'Error: El tipo de ingreso no existe o está inactivo.'
-                    ]
-                ];
+                return $this->validationError('El tipo de ingreso no existe o esta inactivo.');
             }
 
             if ($total <= 0) {
-                return [
-                    'content' => [
-                        'type' => 'text',
-                        'text' => 'Error: El monto total debe ser mayor a 0.'
-                    ]
-                ];
+                return $this->validationError('El monto total debe ser mayor a 0.');
             }
 
             if (empty($porcents)) {
-                return [
-                    'content' => [
-                        'type' => 'text',
-                        'text' => 'Error: Debe especificar al menos un depósito con su porcentaje.'
-                    ]
-                ];
+                return $this->validationError('Debe especificar al menos un deposito con su porcentaje.');
             }
 
             $sumPorcent = 0;
             $deposits = [];
             foreach ($porcents as $index => $item) {
                 if (!isset($item['idPorcent']) || !isset($item['porcent'])) {
-                    return [
-                        'content' => [
-                            'type' => 'text',
-                            'text' => "Error: Cada elemento de porcents debe tener 'idPorcent' y 'porcent'. Error en índice $index."
-                        ]
-                    ];
+                    return $this->validationError("Cada elemento de porcents debe tener 'idPorcent' y 'porcent'. Error en indice $index.");
                 }
 
                 $deposit = $this->table('porcents')
@@ -120,12 +95,7 @@ class InflowMoneyTool extends BaseTool
                     ->first();
 
                 if (!$deposit) {
-                    return [
-                        'content' => [
-                            'type' => 'text',
-                            'text' => "Error: El depósito con ID {$item['idPorcent']} no existe, está inactivo o no pertenece al usuario."
-                        ]
-                    ];
+                    return $this->validationError("El deposito con ID {$item['idPorcent']} no existe, esta inactivo o no pertenece al usuario.");
                 }
 
                 $sumPorcent += $item['porcent'];
@@ -137,12 +107,7 @@ class InflowMoneyTool extends BaseTool
             }
 
             if ($sumPorcent !== 100) {
-                return [
-                    'content' => [
-                        'type' => 'text',
-                        'text' => "Error: La suma de los porcentajes debe ser igual a 100. Suma actual: $sumPorcent"
-                    ]
-                ];
+                return $this->validationError("La suma de los porcentajes debe ser igual a 100. Suma actual: $sumPorcent");
             }
 
             if ($dryRun) {
