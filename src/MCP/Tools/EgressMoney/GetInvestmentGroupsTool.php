@@ -34,12 +34,7 @@ class GetInvestmentGroupsTool extends BaseTool
                 ->first();
 
             if (!$user) {
-                return [
-                    'content' => [
-                        'type' => 'text',
-                        'text' => 'Error: El usuario no existe o esta inactivo.'
-                    ]
-                ];
+                return $this->userNotFound();
             }
 
             $query = $this->table('group_investments')
