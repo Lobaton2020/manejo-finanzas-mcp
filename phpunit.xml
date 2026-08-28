@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache"
+         executionOrder="depends,defects"
+         beStrictAboutOutputDuringTests="true">
+    <testsuites>
+        <testsuite name="default">
+            <directory>tests</directory>
+            <exclude>tests/Schema.php</exclude>
+            <exclude>tests/TestCase.php</exclude>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>src/MCP/Tools</directory>
+        </include>
+    </source>
+</phpunit>

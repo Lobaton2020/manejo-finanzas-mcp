@@ -22,6 +22,16 @@ class Connection
         return self::$capsule;
     }
 
+    public static function setCapsule(?Capsule $capsule): void
+    {
+        self::$capsule = $capsule;
+    }
+
+    public static function resetCapsule(): void
+    {
+        self::$capsule = null;
+    }
+
     private static function configureConnection(Capsule $capsule): void
     {
         $dbPath = __DIR__ . '/../../finanzas.db';
