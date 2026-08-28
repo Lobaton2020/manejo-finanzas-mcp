@@ -39,9 +39,9 @@ class OutflowMoneyTool extends BaseTool
         int $idCategory,
         int $idPorcent,
         float $amount,
-        ?string $setDate = null,
         bool $isInBudget,
         string $description,
+        ?string $setDate = null,
         int $idUser = 1,
         ?int $idGroupInvestment = null,
         bool $dryRun = false
@@ -56,12 +56,7 @@ class OutflowMoneyTool extends BaseTool
                 ->first();
 
             if (!$user) {
-                return [
-                    'content' => [
-                        'type' => 'text',
-                        'text' => 'Error: El usuario no existe o está inactivo.'
-                    ]
-                ];
+                return $this->validationError('El usuario no existe o esta inactivo.');
             }
 
             $outflowType = $this->table('outflowtypes')
@@ -70,12 +65,7 @@ class OutflowMoneyTool extends BaseTool
                 ->first();
 
             if (!$outflowType) {
-                return [
-                    'content' => [
-                        'type' => 'text',
-                        'text' => 'Error: El tipo de egreso no existe o está inactivo.'
-                    ]
-                ];
+                return $this->validationError('El tipo de egreso no existe o esta inactivo.');
             }
 
             $category = $this->table('categories')
@@ -85,12 +75,7 @@ class OutflowMoneyTool extends BaseTool
                 ->first();
 
             if (!$category) {
-                return [
-                    'content' => [
-                        'type' => 'text',
-                        'text' => 'Error: La categoría no existe, está inactiva o no pertenece al tipo de egreso seleccionado.'
-                    ]
-                ];
+                return $this->validationError('La categoria no existe, esta inactiva o no pertenece al tipo de egreso seleccionado.');
             }
 
             $deposit = $this->table('porcents')
@@ -100,46 +85,26 @@ class OutflowMoneyTool extends BaseTool
                 ->first();
 
             if (!$deposit) {
-                return [
-                    'content' => [
-                        'type' => 'text',
-                        'text' => 'Error: El depósito no existe, está inactivo o no pertenece al usuario.'
-                    ]
-                ];
+                return $this->validationError('El deposito no existe, esta inactivo o no pertenece al usuario.');
             }
 
             $isInvestment = stripos($outflowType->name, 'inversion') !== false;
 
             if ($idGroupInvestment !== null) {
                 if (!$isInvestment) {
-                    return [
-                        'content' => [
-                            'type' => 'text',
-                            'text' => 'Error: idGroupInvestment solo aplica cuando el tipo de egreso contiene "inversion".'
-                        ]
-                    ];
+                    return $this->validationError('idGroupInvestment solo aplica cuando el tipo de egreso contiene "inversion".');
                 }
                 $group = $this->table('group_investments')
                     ->where('id_group_investment', $idGroupInvestment)
                     ->where('id_user', $idUser)
                     ->first();
                 if (!$group) {
-                    return [
-                        'content' => [
-                            'type' => 'text',
-                            'text' => 'Error: El grupo de inversion no existe o no pertenece al usuario.'
-                        ]
-                    ];
+                    return $this->validationError('El grupo de inversion no existe o no pertenece al usuario.');
                 }
             }
 
             if ($amount <= 0) {
-                return [
-                    'content' => [
-                        'type' => 'text',
-                        'text' => 'Error: El monto debe ser mayor a 0.'
-                    ]
-                ];
+                return $this->validationError('El monto debe ser mayor a 0.');
             }
 
             $balanceData = $this->table('porcents')
@@ -164,12 +129,7 @@ class OutflowMoneyTool extends BaseTool
             $availableBalance = (float) ($balanceData->total_income ?? 0) - (float) ($balanceData->total_outflow ?? 0);
 
             if ($amount > $availableBalance) {
-                return [
-                    'content' => [
-                        'type' => 'text',
-                        'text' => "Error: El balance disponible ($availableBalance) NO es suficiente para el monto solicitado ($amount)."
-                    ]
-                ];
+                return $this->validationError("El balance disponible ($availableBalance) NO es suficiente para el monto solicitado ($amount).");
             }
 
             if ($dryRun) {
@@ -218,11 +178,13 @@ class OutflowMoneyTool extends BaseTool
                 if ($isInvestment) {
                     $now = date('Y-m-d H:i:s');
                     $investmentData = [
-                        'id_outflow' => $newOutflowId,
-                        'state'      => 'Creado',
-                        'risk_level' => 'Conservador',
-                        'created_at' => $now,
-                        'updated_at' => $now,
+                        'id_outflow'        => $newOutflowId,
+                        'state'             => 'Creado',
+                        'risk_level'        => 'Conservador',
+                        'init_date'         => $setDate,
+                        'end_date'          => date('Y-m-d', strtotime("$setDate +1 month")),
+                        'created_at'        => $now,
+                        'updated_at'        => $now,
                     ];
                     if ($idGroupInvestment !== null) {
                         $investmentData['id_group_investment'] = $idGroupInvestment;
