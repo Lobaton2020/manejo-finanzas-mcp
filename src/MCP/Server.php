@@ -147,24 +147,37 @@ try {
     $server = Server::builder()
         ->setServerInfo('Finanzas MCP Server', '1.0.0')
 
+        // ==== LOOKUPS: catalogos (lo primero que el LLM necesita descubrir) ====
         ->addTool([GetOutflowTypesTool::class, 'getOutflowTypes'], 'get_outflow_types')
         ->addTool([GetInflowTypesTool::class, 'getInflowTypes'], 'get_inflow_types')
         ->addTool([GetCategoriesTool::class, 'getCategories'], 'get_categories')
+        ->addTool([ListDepositsTool::class, 'getDeposits'], 'get_deposits')
+        ->addTool([GetInvestmentGroupsTool::class, 'getInvestmentGroups'], 'get_investment_groups')
+
+        // ==== READS: resúmenes y listas ====
+        ->addTool([GetNetWorthTool::class, 'getNetWorth'], 'get_net_worth')
+        ->addTool([GetNetWorthWithLoansTool::class, 'getNetWorthWithLoans'], 'get_net_worth_with_loans')
         ->addTool([GetAvailableByDepositsTool::class, 'getAvailableByDeposits'], 'get_available_by_deposits')
-        ->addTool([OutflowMoneyTool::class, 'outflowMoney'], 'outflow_money')
+        ->addTool([GetMonthlyBudgetTool::class, 'getMonthlyBudget'], 'get_monthly_budget')
         ->addTool([GetDepositsHistoryTool::class, 'getDepositsHistory'], 'get_deposits_history')
         ->addTool([GetOutflowsByMonthTool::class, 'getOutflowsByMonth'], 'get_outflows_by_month')
-        ->addTool([GetInvestmentGroupsTool::class, 'getInvestmentGroups'], 'get_investment_groups')
-        ->addTool([InflowMoneyTool::class, 'inflowMoney'], 'inflow_money')
         ->addTool([GetExpenseForecastTool::class, 'getExpenseForecast'], 'get_expense_forecast')
-
         ->addTool([ListOutflowsTool::class, 'listOutflows'], 'list_outflows')
-        ->addTool([GetOutflowTool::class, 'getOutflow'], 'get_outflow')
-        ->addTool([UpdateOutflowTool::class, 'updateOutflow'], 'update_outflow')
         ->addTool([ListInflowsTool::class, 'listInflows'], 'list_inflows')
+        ->addTool([ListInvestmentsTool::class, 'listInvestments'], 'list_investments')
+        ->addTool([ListInvestmentRetirementsTool::class, 'listInvestmentRetirements'], 'list_investment_retirements')
+        ->addTool([ListTemporalBudgetsTool::class, 'listTemporalBudgets'], 'list_temporal_budgets')
+        ->addTool([ListNotesTool::class, 'listNotes'], 'list_notes')
+        ->addTool([ListNotificationsTool::class, 'listNotifications'], 'list_notifications')
+        ->addTool([GetOutflowTool::class, 'getOutflow'], 'get_outflow')
         ->addTool([GetInflowTool::class, 'getInflow'], 'get_inflow')
-        ->addTool([UpdateInflowTool::class, 'updateInflow'], 'update_inflow')
+        ->addTool([GetInvestmentTool::class, 'getInvestment'], 'get_investment')
 
+        // ==== WRITE: alta complejidad (los mas usados en produccion) ====
+        ->addTool([OutflowMoneyTool::class, 'outflowMoney'], 'outflow_money')
+        ->addTool([InflowMoneyTool::class, 'inflowMoney'], 'inflow_money')
+
+        // ==== CRUD lookups (catalogos) ====
         ->addTool([CreateOutflowTypeTool::class, 'createOutflowType'], 'create_outflow_type')
         ->addTool([UpdateOutflowTypeTool::class, 'updateOutflowType'], 'update_outflow_type')
         ->addTool([DisableOutflowTypeTool::class, 'disableOutflowType'], 'disable_outflow_type')
@@ -178,23 +191,21 @@ try {
         ->addTool([DisableCategoryTool::class, 'disableCategory'], 'disable_category')
         ->addTool([EnableCategoryTool::class, 'enableCategory'], 'enable_category')
         ->addTool([CreateDepositTool::class, 'createDeposit'], 'create_deposit')
-        ->addTool([ListDepositsTool::class, 'getDeposits'], 'get_deposits')
         ->addTool([UpdateDepositTool::class, 'updateDeposit'], 'update_deposit')
         ->addTool([DisableDepositTool::class, 'disableDeposit'], 'disable_deposit')
         ->addTool([EnableDepositTool::class, 'enableDeposit'], 'enable_deposit')
-
-        ->addTool([ListInvestmentsTool::class, 'listInvestments'], 'list_investments')
-        ->addTool([GetInvestmentTool::class, 'getInvestment'], 'get_investment')
-        ->addTool([UpdateInvestmentTool::class, 'updateInvestment'], 'update_investment')
-        ->addTool([HideInvestmentTool::class, 'hideInvestment'], 'hide_investment')
-        ->addTool([ListInvestmentRetirementsTool::class, 'listInvestmentRetirements'], 'list_investment_retirements')
-        ->addTool([CreateInvestmentRetirementTool::class, 'createInvestmentRetirement'], 'create_investment_retirement')
         ->addTool([CreateInvestmentGroupTool::class, 'createInvestmentGroup'], 'create_investment_group')
         ->addTool([UpdateInvestmentGroupTool::class, 'updateInvestmentGroup'], 'update_investment_group')
 
-        ->addTool([GetMonthlyBudgetTool::class, 'getMonthlyBudget'], 'get_monthly_budget')
+        // ==== CRUD records ====
+        ->addTool([UpdateOutflowTool::class, 'updateOutflow'], 'update_outflow')
+        ->addTool([UpdateInflowTool::class, 'updateInflow'], 'update_inflow')
+        ->addTool([UpdateInvestmentTool::class, 'updateInvestment'], 'update_investment')
+        ->addTool([HideInvestmentTool::class, 'hideInvestment'], 'hide_investment')
+        ->addTool([CreateInvestmentRetirementTool::class, 'createInvestmentRetirement'], 'create_investment_retirement')
+
+        // ==== BUDGETS: ejecucion ====
         ->addTool([SetMonthlyBudgetTool::class, 'setMonthlyBudget'], 'set_monthly_budget')
-        ->addTool([ListTemporalBudgetsTool::class, 'listTemporalBudgets'], 'list_temporal_budgets')
         ->addTool([CreateTemporalBudgetTool::class, 'createTemporalBudget'], 'create_temporal_budget')
         ->addTool([UpdateTemporalBudgetTool::class, 'updateTemporalBudget'], 'update_temporal_budget')
         ->addTool([AddTemporalBudgetOutflowTool::class, 'addTemporalBudgetOutflow'], 'add_temporal_budget_outflow')
@@ -204,16 +215,11 @@ try {
         ->addTool([ExecuteTemporalBudgetTool::class, 'executeTemporalBudget'], 'execute_temporal_budget')
         ->addTool([ExecuteTemporalBudgetItemTool::class, 'executeTemporalBudgetItem'], 'execute_temporal_budget_item')
 
-        ->addTool([ListNotesTool::class, 'listNotes'], 'list_notes')
+        // ==== NOTES / NOTIFS ====
         ->addTool([CreateNoteTool::class, 'createNote'], 'create_note')
         ->addTool([UpdateNoteTool::class, 'updateNote'], 'update_note')
         ->addTool([DisableNoteTool::class, 'disableNote'], 'disable_note')
-
-        ->addTool([ListNotificationsTool::class, 'listNotifications'], 'list_notifications')
         ->addTool([MarkNotificationReadTool::class, 'markNotificationRead'], 'mark_notification_read')
-
-        ->addTool([GetNetWorthTool::class, 'getNetWorth'], 'get_net_worth')
-        ->addTool([GetNetWorthWithLoansTool::class, 'getNetWorthWithLoans'], 'get_net_worth_with_loans')
 
         ->setSession(new FileSessionStore($sessionDir))
         ->build();
